@@ -1,0 +1,65 @@
+services:
+  proxy:
+    build: ./proxy
+    ports:
+      - "80:80"
+      - "443:443"
+    networks:
+      - tailscale
+      - frontend
+    restart: unless-stopped
+
+  tailscale:
+    image: tailscale/tailscale
+    networks:
+      - tailscale
+    cap_add:
+      - NET_ADMIN
+      - NET_RAW
+    environment:
+      - TS_AUTHKEY=${TS_AUTHKEY}
+      - TS_STATE_DIR=/var/lib/tailscale
+      - TS_HOSTNAME=backend
+    volumes:
+      - tailscale-state:/var/lib/tailscale
+      - /dev/net/tun:/dev/net/tun
+    restart: unless-stopped
+
+  backend:
+    image: diogodasilva2/mametier-monitoringsonore-backend:latest
+    network_mode: "service:tailscale"
+    depends_on:
+      - tailscale
+    environment:
+      - BROKER_URL=${BROKER_URL}
+    restart: unless-stopped
+
+  database:
+    image: timescale/timescaledb:latest-pg17
+    environment:
+      - PGDATA=/pgdata
+      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
+      - POSTGRES_USER=${POSTGRES_USER}
+      - POSTGRES_DB=${POSTGRES_DB}
+    volumes:
+      - database-data:/pgdata
+    networks:
+      - tailscale
+    restart: unless-stopped
+
+  frontend:
+    image: diogodasilva2/mametier-monitoringsonore-frontend:latest
+    networks:
+      - frontend
+    environment:
+      - WS_URL=${WS_URL}
+      - MAPBOX_ACCESS_TOKEN=${MAPBOX_ACCESS_TOKEN}
+    restart: unless-stopped
+
+networks:
+  tailscale:
+  frontend:
+
+volumes:
+  tailscale-state:
+  database-data:
