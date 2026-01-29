@@ -20,13 +20,14 @@ services:
       - TS_AUTHKEY=${TS_AUTHKEY}
       - TS_STATE_DIR=/var/lib/tailscale
       - TS_HOSTNAME=backend
+      - TS_USERSPACE=false
     volumes:
       - tailscale-state:/var/lib/tailscale
       - /dev/net/tun:/dev/net/tun
     restart: unless-stopped
 
   backend:
-    image: diogodasilva2/mametier-monitoringsonore-backend:latest
+    image: diogodasilva2/mametier-monitoringsonore-backend:dev
     network_mode: "service:tailscale"
     depends_on:
       - tailscale
@@ -48,7 +49,7 @@ services:
     restart: unless-stopped
 
   frontend:
-    image: diogodasilva2/mametier-monitoringsonore-frontend:latest
+    image: diogodasilva2/mametier-monitoringsonore-frontend:dev
     networks:
       - frontend
     environment:
