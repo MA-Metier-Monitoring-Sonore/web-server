@@ -27,7 +27,7 @@ services:
     restart: unless-stopped
 
   backend:
-    image: diogodasilva2/mametier-monitoringsonore-backend:dev
+    image: diogodasilva2/mametier-monitoringsonore-backend:latest
     network_mode: "service:tailscale"
     depends_on:
       - tailscale
@@ -49,7 +49,7 @@ services:
     restart: unless-stopped
 
   frontend:
-    image: diogodasilva2/mametier-monitoringsonore-frontend:dev
+    image: diogodasilva2/mametier-monitoringsonore-frontend:latest
     networks:
       - frontend
     environment:
